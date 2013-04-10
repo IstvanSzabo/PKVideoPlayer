@@ -18,6 +18,17 @@
 		2F53C0511713B62100311B20 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2F53C0501713B62100311B20 /* Default-568h@2x.png */; };
 		2F53C0541713B62100311B20 /* PKViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2F53C0531713B62100311B20 /* PKViewController.m */; };
 		2F53C0571713B62100311B20 /* PKViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2F53C0551713B62100311B20 /* PKViewController.xib */; };
+		2F53C0601713B78000311B20 /* PKVideoPlayerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2F53C05F1713B78000311B20 /* PKVideoPlayerViewController.m */; };
+		2FA168E8171407DA00F2AF91 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2FA168E7171407DA00F2AF91 /* AVFoundation.framework */; };
+		2FA168EA171407FE00F2AF91 /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2FA168E9171407FE00F2AF91 /* MediaPlayer.framework */; };
+		2FA168EC1714081300F2AF91 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2FA168EB1714081300F2AF91 /* CoreMedia.framework */; };
+		2FA168F017140DCE00F2AF91 /* PKVideoPlayerView.m in Sources */ = {isa = PBXBuildFile; fileRef = 2FA168EF17140DCE00F2AF91 /* PKVideoPlayerView.m */; };
+		2FA168FF171425DD00F2AF91 /* UIColor+PKColor.m in Sources */ = {isa = PBXBuildFile; fileRef = 2FA168F4171425DD00F2AF91 /* UIColor+PKColor.m */; };
+		2FA16900171425DD00F2AF91 /* UIFont+PKFont.m in Sources */ = {isa = PBXBuildFile; fileRef = 2FA168F6171425DD00F2AF91 /* UIFont+PKFont.m */; };
+		2FA16901171425DD00F2AF91 /* UIImage+PKImage.m in Sources */ = {isa = PBXBuildFile; fileRef = 2FA168F8171425DD00F2AF91 /* UIImage+PKImage.m */; };
+		2FA16902171425DD00F2AF91 /* PKResManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 2FA168FA171425DD00F2AF91 /* PKResManager.m */; };
+		2FA16903171425DD00F2AF91 /* style_light.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2FA168FC171425DD00F2AF91 /* style_light.bundle */; };
+		2FA16904171425DD00F2AF91 /* style_night.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2FA168FD171425DD00F2AF91 /* style_night.bundle */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -37,6 +48,25 @@
 		2F53C0521713B62100311B20 /* PKViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PKViewController.h; sourceTree = "<group>"; };
 		2F53C0531713B62100311B20 /* PKViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PKViewController.m; sourceTree = "<group>"; };
 		2F53C0561713B62100311B20 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/PKViewController.xib; sourceTree = "<group>"; };
+		2F53C05E1713B78000311B20 /* PKVideoPlayerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PKVideoPlayerViewController.h; sourceTree = "<group>"; };
+		2F53C05F1713B78000311B20 /* PKVideoPlayerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PKVideoPlayerViewController.m; sourceTree = "<group>"; };
+		2FA168E7171407DA00F2AF91 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		2FA168E9171407FE00F2AF91 /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
+		2FA168EB1714081300F2AF91 /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
+		2FA168ED171408BC00F2AF91 /* PKVideoPlayerKit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PKVideoPlayerKit.h; sourceTree = "<group>"; };
+		2FA168EE17140DCE00F2AF91 /* PKVideoPlayerView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PKVideoPlayerView.h; sourceTree = "<group>"; };
+		2FA168EF17140DCE00F2AF91 /* PKVideoPlayerView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PKVideoPlayerView.m; sourceTree = "<group>"; };
+		2FA168F3171425DD00F2AF91 /* UIColor+PKColor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIColor+PKColor.h"; sourceTree = "<group>"; };
+		2FA168F4171425DD00F2AF91 /* UIColor+PKColor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIColor+PKColor.m"; sourceTree = "<group>"; };
+		2FA168F5171425DD00F2AF91 /* UIFont+PKFont.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIFont+PKFont.h"; sourceTree = "<group>"; };
+		2FA168F6171425DD00F2AF91 /* UIFont+PKFont.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIFont+PKFont.m"; sourceTree = "<group>"; };
+		2FA168F7171425DD00F2AF91 /* UIImage+PKImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+PKImage.h"; sourceTree = "<group>"; };
+		2FA168F8171425DD00F2AF91 /* UIImage+PKImage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+PKImage.m"; sourceTree = "<group>"; };
+		2FA168F9171425DD00F2AF91 /* PKResManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PKResManager.h; sourceTree = "<group>"; };
+		2FA168FA171425DD00F2AF91 /* PKResManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PKResManager.m; sourceTree = "<group>"; };
+		2FA168FB171425DD00F2AF91 /* PKResManagerKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PKResManagerKit.h; sourceTree = "<group>"; };
+		2FA168FC171425DD00F2AF91 /* style_light.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = style_light.bundle; sourceTree = "<group>"; };
+		2FA168FD171425DD00F2AF91 /* style_night.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = style_night.bundle; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -44,6 +74,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2FA168EC1714081300F2AF91 /* CoreMedia.framework in Frameworks */,
+				2FA168EA171407FE00F2AF91 /* MediaPlayer.framework in Frameworks */,
+				2FA168E8171407DA00F2AF91 /* AVFoundation.framework in Frameworks */,
 				2F53C03B1713B62100311B20 /* UIKit.framework in Frameworks */,
 				2F53C03D1713B62100311B20 /* Foundation.framework in Frameworks */,
 				2F53C03F1713B62100311B20 /* CoreGraphics.framework in Frameworks */,
@@ -56,6 +89,9 @@
 		2F53C02E1713B62100311B20 = {
 			isa = PBXGroup;
 			children = (
+				2FA168EB1714081300F2AF91 /* CoreMedia.framework */,
+				2FA168E9171407FE00F2AF91 /* MediaPlayer.framework */,
+				2FA168E7171407DA00F2AF91 /* AVFoundation.framework */,
 				2F53C0401713B62100311B20 /* PKVideoPlayer */,
 				2F53C0391713B62100311B20 /* Frameworks */,
 				2F53C0381713B62100311B20 /* Products */,
@@ -83,6 +119,8 @@
 		2F53C0401713B62100311B20 /* PKVideoPlayer */ = {
 			isa = PBXGroup;
 			children = (
+				2FA168F1171425DD00F2AF91 /* PKResManager */,
+				2F53C05D1713B6B700311B20 /* VideoPlayer */,
 				2F53C0491713B62100311B20 /* PKAppDelegate.h */,
 				2F53C04A1713B62100311B20 /* PKAppDelegate.m */,
 				2F53C0521713B62100311B20 /* PKViewController.h */,
@@ -105,6 +143,44 @@
 				2F53C0501713B62100311B20 /* Default-568h@2x.png */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		2F53C05D1713B6B700311B20 /* VideoPlayer */ = {
+			isa = PBXGroup;
+			children = (
+				2FA168ED171408BC00F2AF91 /* PKVideoPlayerKit.h */,
+				2FA168EE17140DCE00F2AF91 /* PKVideoPlayerView.h */,
+				2FA168EF17140DCE00F2AF91 /* PKVideoPlayerView.m */,
+				2F53C05E1713B78000311B20 /* PKVideoPlayerViewController.h */,
+				2F53C05F1713B78000311B20 /* PKVideoPlayerViewController.m */,
+			);
+			path = VideoPlayer;
+			sourceTree = "<group>";
+		};
+		2FA168F1171425DD00F2AF91 /* PKResManager */ = {
+			isa = PBXGroup;
+			children = (
+				2FA168F2171425DD00F2AF91 /* Additions */,
+				2FA168F9171425DD00F2AF91 /* PKResManager.h */,
+				2FA168FA171425DD00F2AF91 /* PKResManager.m */,
+				2FA168FB171425DD00F2AF91 /* PKResManagerKit.h */,
+				2FA168FC171425DD00F2AF91 /* style_light.bundle */,
+				2FA168FD171425DD00F2AF91 /* style_night.bundle */,
+			);
+			path = PKResManager;
+			sourceTree = "<group>";
+		};
+		2FA168F2171425DD00F2AF91 /* Additions */ = {
+			isa = PBXGroup;
+			children = (
+				2FA168F3171425DD00F2AF91 /* UIColor+PKColor.h */,
+				2FA168F4171425DD00F2AF91 /* UIColor+PKColor.m */,
+				2FA168F5171425DD00F2AF91 /* UIFont+PKFont.h */,
+				2FA168F6171425DD00F2AF91 /* UIFont+PKFont.m */,
+				2FA168F7171425DD00F2AF91 /* UIImage+PKImage.h */,
+				2FA168F8171425DD00F2AF91 /* UIImage+PKImage.m */,
+			);
+			path = Additions;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -164,6 +240,8 @@
 				2F53C04F1713B62100311B20 /* Default@2x.png in Resources */,
 				2F53C0511713B62100311B20 /* Default-568h@2x.png in Resources */,
 				2F53C0571713B62100311B20 /* PKViewController.xib in Resources */,
+				2FA16903171425DD00F2AF91 /* style_light.bundle in Resources */,
+				2FA16904171425DD00F2AF91 /* style_night.bundle in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -177,6 +255,12 @@
 				2F53C0471713B62100311B20 /* main.m in Sources */,
 				2F53C04B1713B62100311B20 /* PKAppDelegate.m in Sources */,
 				2F53C0541713B62100311B20 /* PKViewController.m in Sources */,
+				2F53C0601713B78000311B20 /* PKVideoPlayerViewController.m in Sources */,
+				2FA168F017140DCE00F2AF91 /* PKVideoPlayerView.m in Sources */,
+				2FA168FF171425DD00F2AF91 /* UIColor+PKColor.m in Sources */,
+				2FA16900171425DD00F2AF91 /* UIFont+PKFont.m in Sources */,
+				2FA16901171425DD00F2AF91 /* UIImage+PKImage.m in Sources */,
+				2FA16902171425DD00F2AF91 /* PKResManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

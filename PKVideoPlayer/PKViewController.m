@@ -7,6 +7,7 @@
 //
 
 #import "PKViewController.h"
+#import "PKVideoPlayerViewController.h"
 
 @interface PKViewController ()
 
@@ -18,8 +19,31 @@
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
+    UIButton *btn = [[UIButton alloc] initWithFrame:CGRectMake(120, 200, 50, 50)];
+    btn.backgroundColor = [UIColor grayColor];
+    [btn setTitle:@"play" forState:UIControlStateNormal];
+    [btn addTarget:self action:@selector(play) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:btn];
 }
+- (void)play
+{
+    PKVideoPlayerViewController *videoVC = [PKVideoPlayerViewController videoPlayerWithContainingViewController:self
+                                                                                                optionalTopView:nil
+                                                                                        hideTopViewWithControls:NO];
+    
+    //[self addChildViewController:videoVC];
+    //[self.view addSubview:videoVC.view];
+    [self presentViewController:videoVC animated:YES completion:^{
+        NSURL *url = [NSURL URLWithString:@"http://v.youku.com/player/getM3U8/vid/134945872/type/flv/ts/1365561348/useKeyFrame/0/v.m3u8"];
+        [videoVC playVideoWithTitle:@"Title" URL:url videoID:nil shareURL:nil isStreaming:NO playInFullScreen:YES];
+    }];
+}
+- (void)viewDidAppear:(BOOL)animated
+{
+    [super viewDidAppear:animated];
+    
 
+}
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
