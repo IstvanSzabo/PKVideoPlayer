@@ -33,8 +33,8 @@
     
     //[self addChildViewController:videoVC];
     //[self.view addSubview:videoVC.view];
-    [self presentViewController:videoVC animated:YES completion:^{
-        NSURL *url = [NSURL URLWithString:@"http://v.youku.com/player/getM3U8/vid/134945872/type/flv/ts/1365561348/useKeyFrame/0/v.m3u8"];
+    [self presentViewController:videoVC animated:YES completion:^{        
+        NSURL *url = [NSURL URLWithString:@"http://v.youku.com/player/getM3U8/vid/XMzA1NDE1MjU2/v.m3u8"];
         [videoVC playVideoWithTitle:@"Title" URL:url videoID:nil shareURL:nil isStreaming:NO playInFullScreen:YES];
     }];
 }
