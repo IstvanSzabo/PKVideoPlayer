@@ -6,8 +6,11 @@
 //  Copyright (c) 2013年 icePhone. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
+#import <AVFoundation/AVFoundation.h>
+#import <CoreMedia/CoreMedia.h>
+#import <MediaPlayer/MediaPlayer.h>
 #import "PKVideoPlayerView.h"
+#import "PKVideoPlayerViewController.h"
 
 extern NSString * const kVideoPlayerVideoChangedNotification;
 extern NSString * const kVideoPlayerWillHideControlsNotification;
