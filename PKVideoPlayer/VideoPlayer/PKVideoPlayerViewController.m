@@ -48,6 +48,8 @@ isPlaying = _isPlaying;
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [self removeObserversFromVideoPlayerItem];
+    [self removePlayerTimeObservers];
 }
 
 #pragma mark -
@@ -563,6 +565,7 @@ isPlaying = _isPlaying;
 
 - (void)dismissSelfHandler
 {
+    [_videoPlayer pause];
     [self dismissModalViewControllerAnimated:YES];
 }
 @end
