@@ -12,6 +12,7 @@
 
 @property (readwrite)        CGFloat                     padding;
 @property (readonly, strong) UILabel                    *titleLabel;
+@property (readonly, strong) UIButton                   *backButton;
 @property (readonly, strong) UIView                     *playerControlBar;
 @property (readonly, strong) UIButton                   *playPauseButton;
 @property (readonly, strong) UISlider                   *videoScrubber;

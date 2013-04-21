@@ -63,8 +63,8 @@ isPlaying = _isPlaying;
         self.videoPlayerView = [[PKVideoPlayerView alloc] initWithFrame:CGRectZero];
         [self.videoPlayerView sizeToFit];
         self.videoPlayerView.autoresizingMask = UIViewAutoresizingFlexibleWidth|
-                                                UIViewAutoresizingFlexibleHeight;
-    }    
+        UIViewAutoresizingFlexibleHeight;
+    }
     self.view = self.videoPlayerView;
 }
 
@@ -73,6 +73,8 @@ isPlaying = _isPlaying;
     [super viewDidLoad];
     // 播放键
     [_videoPlayerView.playPauseButton addTarget:self action:@selector(playPauseHandler) forControlEvents:UIControlEventTouchUpInside];
+    // 返回键
+    [_videoPlayerView.backButton addTarget:self action:@selector(dismissSelfHandler) forControlEvents:UIControlEventTouchUpInside];
     // 进度条
     [_videoPlayerView.videoScrubber addTarget:self action:@selector(scrubbingDidBegin) forControlEvents:UIControlEventTouchDown];
     [_videoPlayerView.videoScrubber addTarget:self action:@selector(scrubberIsScrolling) forControlEvents:UIControlEventValueChanged];
@@ -215,6 +217,7 @@ isPlaying = _isPlaying;
     [UIView animateWithDuration:0.4 animations:^{
         self.videoPlayerView.playerControlBar.alpha = 1.0;
         self.videoPlayerView.titleLabel.alpha = 1.0;
+        self.videoPlayerView.backButton.alpha = 1.0;
         //_videoPlayerView.shareButton.alpha = 1.0;
     } completion:nil];
     
@@ -238,6 +241,7 @@ isPlaying = _isPlaying;
         [UIView animateWithDuration:0.4 animations:^{
             self.videoPlayerView.playerControlBar.alpha = 0;
             self.videoPlayerView.titleLabel.alpha = 0;
+            self.videoPlayerView.backButton.alpha = 0;
         } completion:nil];
         
         if (self.fullScreenModeToggled) {
@@ -248,6 +252,7 @@ isPlaying = _isPlaying;
     } else {
         self.videoPlayerView.playerControlBar.alpha = 0;
         self.videoPlayerView.titleLabel.alpha = 0;
+        self.videoPlayerView.backButton.alpha = 0;
         if (self.fullScreenModeToggled) {
             [[UIApplication sharedApplication] setStatusBarHidden:YES
                                                     withAnimation:UIStatusBarAnimationNone];
@@ -278,11 +283,11 @@ isPlaying = _isPlaying;
         }
         
         [_videoPlayerView.currentPositionLabel setText:[NSString stringWithFormat:@"%@ ", [self stringFormattedTimeFromSeconds:&currentTime]]];
-//        if (!self.showStaticEndTime) {
-//            [_videoPlayerView.timeLeftLabel setText:[NSString stringWithFormat:@"-%@", [self stringFormattedTimeFromSeconds:&timeLeft]]];
-//        } else {
-            [_videoPlayerView.timeLeftLabel setText:[NSString stringWithFormat:@"%@", [self stringFormattedTimeFromSeconds:&duration]]];
-//        }
+        //        if (!self.showStaticEndTime) {
+        //            [_videoPlayerView.timeLeftLabel setText:[NSString stringWithFormat:@"-%@", [self stringFormattedTimeFromSeconds:&timeLeft]]];
+        //        } else {
+        [_videoPlayerView.timeLeftLabel setText:[NSString stringWithFormat:@"%@", [self stringFormattedTimeFromSeconds:&duration]]];
+        //        }
 	}
 }
 
@@ -427,8 +432,8 @@ isPlaying = _isPlaying;
 {
     if (object == _videoPlayer
         && ([keyPath isEqualToString:@"externalPlaybackActive"] || [keyPath isEqualToString:@"airPlayVideoActive"])) {
-//        BOOL externalPlaybackActive = [[change objectForKey:NSKeyValueChangeNewKey] boolValue];
-//        [[_videoPlayerView airplayIsActiveView] setHidden:!externalPlaybackActive];
+        //        BOOL externalPlaybackActive = [[change objectForKey:NSKeyValueChangeNewKey] boolValue];
+        //        [[_videoPlayerView airplayIsActiveView] setHidden:!externalPlaybackActive];
         return;
     }
     
@@ -443,28 +448,29 @@ isPlaying = _isPlaying;
                 playWhenReady = YES;
                 break;
             case AVPlayerStatusFailed:
-                // TODO:
+                // TODO: 重试X次后，提示失败
                 [self removeObserversFromVideoPlayerItem];
-                //[self removePlayerTimeObservers];
+                [self removePlayerTimeObservers];
                 self.videoPlayer = nil;
                 NSLog(@"failed");
                 break;
         }
     } else if ([keyPath isEqualToString:@"playbackBufferEmpty"] && _videoPlayer.currentItem.playbackBufferEmpty) {
         self.playerIsBuffering = YES;
+        NSLog(@"kvo: playbackBufferEmpty startAnimating");
         [[_videoPlayerView activityIndicator] startAnimating];
         [self syncPlayPauseButtons];
     } else if ([keyPath isEqualToString:@"playbackLikelyToKeepUp"] && _videoPlayer.currentItem.playbackLikelyToKeepUp) {
-        NSLog(@"playbackLikelyToKeepUp");
+        NSLog(@"kvo: playbackLikelyToKeepUp stopAnimating");
         if (![self isPlaying] && (playWhenReady || self.playerIsBuffering || scrubBuffering)) {
             [self playVideo];
         }
         [[_videoPlayerView activityIndicator] stopAnimating];
         
     } else if ([keyPath isEqualToString:@"loadedTimeRanges"]) {
-        float durationTime = CMTimeGetSeconds([[self.videoPlayer currentItem] duration]);        
+        float durationTime = CMTimeGetSeconds([[self.videoPlayer currentItem] duration]);
         float bufferTime = [self availableDuration];
-        NSLog(@"durationTime:%.3f",bufferTime/durationTime);
+        NSLog(@"kvo: loadedTimeRanges:%.3f",bufferTime/durationTime);
         [self.videoPlayerView.progressView setProgress:bufferTime/durationTime animated:YES];
     }
     
@@ -481,7 +487,7 @@ isPlaying = _isPlaying;
         float startSeconds = CMTimeGetSeconds(timeRange.start);
         float durationSeconds = CMTimeGetSeconds(timeRange.duration);
         ret = (startSeconds + durationSeconds);
-    }    
+    }
     return ret;
 }
 
@@ -555,6 +561,10 @@ isPlaying = _isPlaying;
     [self showControls];
 }
 
+- (void)dismissSelfHandler
+{
+    [self dismissModalViewControllerAnimated:YES];
+}
 @end
 
 
@@ -562,7 +572,7 @@ isPlaying = _isPlaying;
 
 #pragma mark - UIInterfaceOrientation
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)orientation{
-//    return UIDeviceOrientationIsValidInterfaceOrientation(orientation);
+    //    return UIDeviceOrientationIsValidInterfaceOrientation(orientation);
     return UIInterfaceOrientationIsLandscape(orientation);
 }
 // iOS 6.0+ 横竖屏
@@ -571,7 +581,7 @@ isPlaying = _isPlaying;
 }
 
 - (NSUInteger)supportedInterfaceOrientations {
-//    return UIInterfaceOrientationMaskAll;
+    //    return UIInterfaceOrientationMaskAll;
     return UIInterfaceOrientationMaskLandscape;
 }
 

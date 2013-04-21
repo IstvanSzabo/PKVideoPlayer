@@ -11,7 +11,7 @@
 #define PLAYER_CONTROL_BAR_HEIGHT 40
 #define BUTTON_PADDING 8
 #define CURRENT_POSITION_WIDTH 56
-#define TIME_LEFT_WIDTH 59
+#define TIME_LEFT_WIDTH 70
 #define ALIGNMENT_FUZZ 2
 #define ROUTE_BUTTON_ALIGNMENT_FUZZ 8
 
@@ -38,7 +38,20 @@
         [_titleLabel setBackgroundColor:[UIColor clearColor]];
         [_titleLabel setNumberOfLines:2];
         [_titleLabel setLineBreakMode:NSLineBreakByWordWrapping];
+        [_titleLabel setAdjustsFontSizeToFitWidth:YES];
+        [_titleLabel setTextAlignment:NSTextAlignmentCenter];
         [self addSubview:_titleLabel];
+        
+        _backButton = [[UIButton alloc] initWithFrame:CGRectMake(5.0f, 5.0f, 60, 30)];
+        [_backButton setTitle:@"返回" forState:UIControlStateNormal];
+        [_backButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        [_backButton setBackgroundColor:[UIColor colorWithRed:1.0f
+                                                        green:1.0f
+                                                         blue:0.0f
+                                                        alpha:0.3f]];
+        [_backButton setShowsTouchWhenHighlighted:YES];
+        [self addSubview:_backButton];
+        
         
         _playerControlBar = [[UIView alloc] init];
         [_playerControlBar setOpaque:NO];
@@ -47,8 +60,8 @@
         _playPauseButton = [[UIButton alloc] init];
         [_playPauseButton setImage:[UIImage imageForKey:@"play-button"] forState:UIControlStateNormal];
         [_playPauseButton setShowsTouchWhenHighlighted:YES];
-        [_playerControlBar addSubview:_playPauseButton];    
-        
+        [_playerControlBar addSubview:_playPauseButton];
+   
         _progressView = [[UIProgressView alloc] init];
         _progressView.progressTintColor = [UIColor colorWithRed:31.0/255.0 green:31.0/255.0 blue:31.0/255.0 alpha:1.0];
         _progressView.trackTintColor = [UIColor darkGrayColor];
