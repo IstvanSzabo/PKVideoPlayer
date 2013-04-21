@@ -21,9 +21,29 @@
 @interface PKVideoPlayerViewController () <UIGestureRecognizerDelegate>
 @property (readwrite, strong) id scrubberTimeObserver;
 @property (readwrite, strong) id playClockTimeObserver;
+
+@property (readwrite) BOOL restoreVideoPlayStateAfterScrubbing;
+@property (readwrite) BOOL seekToZeroBeforePlay;
+@property (readwrite) BOOL rotationIsLocked;
+@property (readwrite) BOOL playerIsBuffering;
+@property (nonatomic, weak) UIViewController *containingViewController;
+@property (nonatomic, weak) UIView *topView;
+@property (readwrite) BOOL fullScreenModeToggled;
+@property (nonatomic) BOOL isAlwaysFullscreen;
+//@property (nonatomic, strong) FullScreenViewController *fullscreenViewController;
+@property (nonatomic) CGRect previousBounds;
+@property (nonatomic) BOOL hideTopViewWithControls;
+
 @end
 
 @implementation PKVideoPlayerViewController
+{
+    BOOL playWhenReady;
+    BOOL scrubBuffering;
+    BOOL showShareOptions;
+}
+@synthesize
+isPlaying = _isPlaying;
 
 - (void)dealloc
 {
@@ -51,7 +71,13 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    // 播放键
     [_videoPlayerView.playPauseButton addTarget:self action:@selector(playPauseHandler) forControlEvents:UIControlEventTouchUpInside];
+    // 进度条
+    [_videoPlayerView.videoScrubber addTarget:self action:@selector(scrubbingDidBegin) forControlEvents:UIControlEventTouchDown];
+    [_videoPlayerView.videoScrubber addTarget:self action:@selector(scrubberIsScrolling) forControlEvents:UIControlEventValueChanged];
+    [_videoPlayerView.videoScrubber addTarget:self action:@selector(scrubbingDidEnd) forControlEvents:(UIControlEventTouchUpInside | UIControlEventTouchCancel)];
+    // 手势
     UITapGestureRecognizer *playerTouchedGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(videoTapHandler)];
     playerTouchedGesture.delegate = self;
     [_videoPlayerView addGestureRecognizer:playerTouchedGesture];
@@ -61,7 +87,48 @@
 {
     [super viewWillAppear:animated];
 }
+#pragma mark - Public
+- (void)playVideoWithTitle:(NSString *)title
+                       URL:(NSURL *)url
+                   videoID:(NSString *)videoID
+                  shareURL:(NSURL *)shareURL
+               isStreaming:(BOOL)streaming
+          playInFullScreen:(BOOL)playInFullScreen
+{
+    [self.videoPlayer pause];
+    [[_videoPlayerView activityIndicator] startAnimating];
+    [self showControls];
+    
+    [self.videoPlayerView.progressView setProgress:0 animated:NO];
+    [_videoPlayerView.currentPositionLabel setText:@""];
+    [_videoPlayerView.timeLeftLabel setText:@""];
+    _videoPlayerView.videoScrubber.value = 0;
+    [_videoPlayerView setTitle:title];
+    
+    [[MPNowPlayingInfoCenter defaultCenter] setNowPlayingInfo:@{
+                                     MPMediaItemPropertyTitle: title,
+     }];
+    
+    [self setURL:url];
+    
+    [self syncPlayPauseButtons];
+    
+    if (playInFullScreen) {
+        [self launchFullScreen];
+    }
+}
+- (void)setControlsEdgeInsets:(UIEdgeInsets)controlsEdgeInsets
+{
+    if (!self.videoPlayerView) {
+        self.videoPlayerView = [[PKVideoPlayerView alloc] initWithFrame:CGRectZero];
+    }
+    _controlsEdgeInsets = controlsEdgeInsets;
+    self.videoPlayerView.controlsEdgeInsets = _controlsEdgeInsets;
+    
+    [self.view setNeedsLayout];
+}
 
+#pragma mark - Private
 - (void)videoTapHandler
 {
     if (_videoPlayerView.playerControlBar.alpha) {
@@ -74,7 +141,15 @@
 - (void)syncFullScreenButton:(UIInterfaceOrientation)toInterfaceOrientation
 {}
 - (void)showCannotFetchStreamError
-{}
+{
+    UIAlertView *alertView = [[UIAlertView alloc]
+                              initWithTitle:@"Sad Panda says..."
+                              message:@"I can't seem to fetch that stream. Please try again later."
+                              delegate:nil
+                              cancelButtonTitle:@"Bummer!"
+                              otherButtonTitles:nil];
+    [alertView show];
+}
 - (void)launchFullScreen
 {}
 - (void)minimizeVideo
@@ -240,41 +315,13 @@
 
 - (void)playVideo
 {
-//    self.playerIsBuffering = NO;
-//    scrubBuffering = NO;
-//    playWhenReady = NO;
+    self.playerIsBuffering = NO;
+    scrubBuffering = NO;
+    playWhenReady = NO;
     // Configuration is done, ready to start.
     [self.videoPlayer play];
     [self updatePlaybackProgress];
 }
-- (void)playVideoWithTitle:(NSString *)title
-                       URL:(NSURL *)url
-                   videoID:(NSString *)videoID
-                  shareURL:(NSURL *)shareURL
-               isStreaming:(BOOL)streaming
-          playInFullScreen:(BOOL)playInFullScreen
-{
-    [self.videoPlayer pause];
-    [[_videoPlayerView activityIndicator] startAnimating];
-    [self.videoPlayerView.progressView setProgress:0 animated:NO];
-    [_videoPlayerView.currentPositionLabel setText:@""];
-    [_videoPlayerView.timeLeftLabel setText:@""];
-    _videoPlayerView.videoScrubber.value = 0;
-    [_videoPlayerView setTitle:title];
-    
-    [[MPNowPlayingInfoCenter defaultCenter] setNowPlayingInfo:@{
-                                     MPMediaItemPropertyTitle: title,
-     }];
-    
-    [self setURL:url];
-    
-    [self syncPlayPauseButtons];
-    
-    if (playInFullScreen) {
-        [self launchFullScreen];
-    }
-}
-
 
 - (NSString *)stringFormattedTimeFromSeconds:(double *)seconds
 {
@@ -393,7 +440,7 @@
         AVPlayerStatus status = [[change objectForKey:NSKeyValueChangeNewKey] integerValue];
         switch (status) {
             case AVPlayerStatusReadyToPlay:
-//                playWhenReady = YES;
+                playWhenReady = YES;
                 break;
             case AVPlayerStatusFailed:
                 // TODO:
@@ -404,15 +451,12 @@
                 break;
         }
     } else if ([keyPath isEqualToString:@"playbackBufferEmpty"] && _videoPlayer.currentItem.playbackBufferEmpty) {
-        //self.playerIsBuffering = YES;
+        self.playerIsBuffering = YES;
         [[_videoPlayerView activityIndicator] startAnimating];
         [self syncPlayPauseButtons];
     } else if ([keyPath isEqualToString:@"playbackLikelyToKeepUp"] && _videoPlayer.currentItem.playbackLikelyToKeepUp) {
         NSLog(@"playbackLikelyToKeepUp");
-//        if (![self isPlaying] && (playWhenReady || self.playerIsBuffering || scrubBuffering)) {
-//            [self playVideo];
-//        }
-        if (![self isPlaying]) {
+        if (![self isPlaying] && (playWhenReady || self.playerIsBuffering || scrubBuffering)) {
             [self playVideo];
         }
         [[_videoPlayerView activityIndicator] stopAnimating];
@@ -421,7 +465,7 @@
         float durationTime = CMTimeGetSeconds([[self.videoPlayer currentItem] duration]);        
         float bufferTime = [self availableDuration];
         NSLog(@"durationTime:%.3f",bufferTime/durationTime);
-//        [self.videoPlayerView.progressView setProgress:bufferTime/durationTime animated:YES];
+        [self.videoPlayerView.progressView setProgress:bufferTime/durationTime animated:YES];
     }
     
     return;
@@ -444,6 +488,71 @@
 - (BOOL)isPlaying
 {
     return [_videoPlayer rate] != 0.0;
+}
+
+-(void)removePlayerTimeObservers
+{
+    if (_scrubberTimeObserver) {
+        [_videoPlayer removeTimeObserver:_scrubberTimeObserver];
+        _scrubberTimeObserver = nil;
+    }
+    
+    if (_playClockTimeObserver) {
+        [_videoPlayer removeTimeObserver:_playClockTimeObserver];
+        _playClockTimeObserver = nil;
+    }
+}
+- (void)playerItemDidReachEnd:(NSNotification *)notification
+{
+    [self syncPlayPauseButtons];
+    _seekToZeroBeforePlay = YES;
+    
+    [self minimizeVideo];
+}
+
+-(void)scrubbingDidBegin
+{
+    if ([self isPlaying]) {
+        [_videoPlayer pause];
+        [self syncPlayPauseButtons];
+        self.restoreVideoPlayStateAfterScrubbing = YES;
+        [self showControls];
+    }
+}
+
+-(void)scrubberIsScrolling
+{
+    CMTime playerDuration = [self playerItemDuration];
+    double duration = CMTimeGetSeconds(playerDuration);
+    if (isfinite(duration)) {
+        double currentTime = floor(duration * _videoPlayerView.videoScrubber.value);
+        double timeLeft = floor(duration - currentTime);
+        
+        if (currentTime <= 0) {
+            currentTime = 0;
+            timeLeft = floor(duration);
+        }
+        
+        [_videoPlayerView.currentPositionLabel setText:[NSString stringWithFormat:@"%@ ", [self stringFormattedTimeFromSeconds:&currentTime]]];
+        
+        if (!self.showStaticEndTime) {
+            [_videoPlayerView.timeLeftLabel setText:[NSString stringWithFormat:@"-%@", [self stringFormattedTimeFromSeconds:&timeLeft]]];
+        } else {
+            [_videoPlayerView.timeLeftLabel setText:[NSString stringWithFormat:@"%@", [self stringFormattedTimeFromSeconds:&duration]]];
+        }
+        [_videoPlayer seekToTime:CMTimeMakeWithSeconds((float) currentTime, NSEC_PER_SEC)];
+    }
+}
+
+-(void)scrubbingDidEnd
+{
+    if (self.restoreVideoPlayStateAfterScrubbing) {
+        self.restoreVideoPlayStateAfterScrubbing = NO;
+        scrubBuffering = YES;
+    }
+    [[_videoPlayerView activityIndicator] startAnimating];
+    
+    [self showControls];
 }
 
 @end
