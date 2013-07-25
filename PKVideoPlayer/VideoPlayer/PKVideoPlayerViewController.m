@@ -21,35 +21,13 @@
 @interface PKVideoPlayerViewController () <UIGestureRecognizerDelegate>
 @property (readwrite, strong) id scrubberTimeObserver;
 @property (readwrite, strong) id playClockTimeObserver;
-
-@property (readwrite) BOOL restoreVideoPlayStateAfterScrubbing;
-@property (readwrite) BOOL seekToZeroBeforePlay;
-@property (readwrite) BOOL rotationIsLocked;
-@property (readwrite) BOOL playerIsBuffering;
-@property (nonatomic, weak) UIViewController *containingViewController;
-@property (nonatomic, weak) UIView *topView;
-@property (readwrite) BOOL fullScreenModeToggled;
-@property (nonatomic) BOOL isAlwaysFullscreen;
-//@property (nonatomic, strong) FullScreenViewController *fullscreenViewController;
-@property (nonatomic) CGRect previousBounds;
-@property (nonatomic) BOOL hideTopViewWithControls;
-
 @end
 
 @implementation PKVideoPlayerViewController
-{
-    BOOL playWhenReady;
-    BOOL scrubBuffering;
-    BOOL showShareOptions;
-}
-@synthesize
-isPlaying = _isPlaying;
 
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [self removeObserversFromVideoPlayerItem];
-    [self removePlayerTimeObservers];
 }
 
 #pragma mark -
@@ -65,23 +43,15 @@ isPlaying = _isPlaying;
         self.videoPlayerView = [[PKVideoPlayerView alloc] initWithFrame:CGRectZero];
         [self.videoPlayerView sizeToFit];
         self.videoPlayerView.autoresizingMask = UIViewAutoresizingFlexibleWidth|
-        UIViewAutoresizingFlexibleHeight;
-    }
+                                                UIViewAutoresizingFlexibleHeight;
+    }    
     self.view = self.videoPlayerView;
 }
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    // 播放键
     [_videoPlayerView.playPauseButton addTarget:self action:@selector(playPauseHandler) forControlEvents:UIControlEventTouchUpInside];
-    // 返回键
-    [_videoPlayerView.backButton addTarget:self action:@selector(dismissSelfHandler) forControlEvents:UIControlEventTouchUpInside];
-    // 进度条
-    [_videoPlayerView.videoScrubber addTarget:self action:@selector(scrubbingDidBegin) forControlEvents:UIControlEventTouchDown];
-    [_videoPlayerView.videoScrubber addTarget:self action:@selector(scrubberIsScrolling) forControlEvents:UIControlEventValueChanged];
-    [_videoPlayerView.videoScrubber addTarget:self action:@selector(scrubbingDidEnd) forControlEvents:(UIControlEventTouchUpInside | UIControlEventTouchCancel)];
-    // 手势
     UITapGestureRecognizer *playerTouchedGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(videoTapHandler)];
     playerTouchedGesture.delegate = self;
     [_videoPlayerView addGestureRecognizer:playerTouchedGesture];
@@ -91,48 +61,7 @@ isPlaying = _isPlaying;
 {
     [super viewWillAppear:animated];
 }
-#pragma mark - Public
-- (void)playVideoWithTitle:(NSString *)title
-                       URL:(NSURL *)url
-                   videoID:(NSString *)videoID
-                  shareURL:(NSURL *)shareURL
-               isStreaming:(BOOL)streaming
-          playInFullScreen:(BOOL)playInFullScreen
-{
-    [self.videoPlayer pause];
-    [[_videoPlayerView activityIndicator] startAnimating];
-    [self showControls];
-    
-    [self.videoPlayerView.progressView setProgress:0 animated:NO];
-    [_videoPlayerView.currentPositionLabel setText:@""];
-    [_videoPlayerView.timeLeftLabel setText:@""];
-    _videoPlayerView.videoScrubber.value = 0;
-    [_videoPlayerView setTitle:title];
-    
-    [[MPNowPlayingInfoCenter defaultCenter] setNowPlayingInfo:@{
-                                     MPMediaItemPropertyTitle: title,
-     }];
-    
-    [self setURL:url];
-    
-    [self syncPlayPauseButtons];
-    
-    if (playInFullScreen) {
-        [self launchFullScreen];
-    }
-}
-- (void)setControlsEdgeInsets:(UIEdgeInsets)controlsEdgeInsets
-{
-    if (!self.videoPlayerView) {
-        self.videoPlayerView = [[PKVideoPlayerView alloc] initWithFrame:CGRectZero];
-    }
-    _controlsEdgeInsets = controlsEdgeInsets;
-    self.videoPlayerView.controlsEdgeInsets = _controlsEdgeInsets;
-    
-    [self.view setNeedsLayout];
-}
 
-#pragma mark - Private
 - (void)videoTapHandler
 {
     if (_videoPlayerView.playerControlBar.alpha) {
@@ -145,15 +74,7 @@ isPlaying = _isPlaying;
 - (void)syncFullScreenButton:(UIInterfaceOrientation)toInterfaceOrientation
 {}
 - (void)showCannotFetchStreamError
-{
-    UIAlertView *alertView = [[UIAlertView alloc]
-                              initWithTitle:@"Sad Panda says..."
-                              message:@"I can't seem to fetch that stream. Please try again later."
-                              delegate:nil
-                              cancelButtonTitle:@"Bummer!"
-                              otherButtonTitles:nil];
-    [alertView show];
-}
+{}
 - (void)launchFullScreen
 {}
 - (void)minimizeVideo
@@ -219,7 +140,6 @@ isPlaying = _isPlaying;
     [UIView animateWithDuration:0.4 animations:^{
         self.videoPlayerView.playerControlBar.alpha = 1.0;
         self.videoPlayerView.titleLabel.alpha = 1.0;
-        self.videoPlayerView.backButton.alpha = 1.0;
         //_videoPlayerView.shareButton.alpha = 1.0;
     } completion:nil];
     
@@ -243,7 +163,6 @@ isPlaying = _isPlaying;
         [UIView animateWithDuration:0.4 animations:^{
             self.videoPlayerView.playerControlBar.alpha = 0;
             self.videoPlayerView.titleLabel.alpha = 0;
-            self.videoPlayerView.backButton.alpha = 0;
         } completion:nil];
         
         if (self.fullScreenModeToggled) {
@@ -254,7 +173,6 @@ isPlaying = _isPlaying;
     } else {
         self.videoPlayerView.playerControlBar.alpha = 0;
         self.videoPlayerView.titleLabel.alpha = 0;
-        self.videoPlayerView.backButton.alpha = 0;
         if (self.fullScreenModeToggled) {
             [[UIApplication sharedApplication] setStatusBarHidden:YES
                                                     withAnimation:UIStatusBarAnimationNone];
@@ -285,11 +203,11 @@ isPlaying = _isPlaying;
         }
         
         [_videoPlayerView.currentPositionLabel setText:[NSString stringWithFormat:@"%@ ", [self stringFormattedTimeFromSeconds:&currentTime]]];
-        //        if (!self.showStaticEndTime) {
-        //            [_videoPlayerView.timeLeftLabel setText:[NSString stringWithFormat:@"-%@", [self stringFormattedTimeFromSeconds:&timeLeft]]];
-        //        } else {
-        [_videoPlayerView.timeLeftLabel setText:[NSString stringWithFormat:@"%@", [self stringFormattedTimeFromSeconds:&duration]]];
-        //        }
+//        if (!self.showStaticEndTime) {
+//            [_videoPlayerView.timeLeftLabel setText:[NSString stringWithFormat:@"-%@", [self stringFormattedTimeFromSeconds:&timeLeft]]];
+//        } else {
+            [_videoPlayerView.timeLeftLabel setText:[NSString stringWithFormat:@"%@", [self stringFormattedTimeFromSeconds:&duration]]];
+//        }
 	}
 }
 
@@ -322,13 +240,41 @@ isPlaying = _isPlaying;
 
 - (void)playVideo
 {
-    self.playerIsBuffering = NO;
-    scrubBuffering = NO;
-    playWhenReady = NO;
+//    self.playerIsBuffering = NO;
+//    scrubBuffering = NO;
+//    playWhenReady = NO;
     // Configuration is done, ready to start.
     [self.videoPlayer play];
     [self updatePlaybackProgress];
 }
+- (void)playVideoWithTitle:(NSString *)title
+                       URL:(NSURL *)url
+                   videoID:(NSString *)videoID
+                  shareURL:(NSURL *)shareURL
+               isStreaming:(BOOL)streaming
+          playInFullScreen:(BOOL)playInFullScreen
+{
+    [self.videoPlayer pause];
+    [[_videoPlayerView activityIndicator] startAnimating];
+    [self.videoPlayerView.progressView setProgress:0 animated:NO];
+    [_videoPlayerView.currentPositionLabel setText:@""];
+    [_videoPlayerView.timeLeftLabel setText:@""];
+    _videoPlayerView.videoScrubber.value = 0;
+    [_videoPlayerView setTitle:title];
+    
+    [[MPNowPlayingInfoCenter defaultCenter] setNowPlayingInfo:@{
+                                     MPMediaItemPropertyTitle: title,
+     }];
+    
+    [self setURL:url];
+    
+    [self syncPlayPauseButtons];
+    
+    if (playInFullScreen) {
+        [self launchFullScreen];
+    }
+}
+
 
 - (NSString *)stringFormattedTimeFromSeconds:(double *)seconds
 {
@@ -434,8 +380,8 @@ isPlaying = _isPlaying;
 {
     if (object == _videoPlayer
         && ([keyPath isEqualToString:@"externalPlaybackActive"] || [keyPath isEqualToString:@"airPlayVideoActive"])) {
-        //        BOOL externalPlaybackActive = [[change objectForKey:NSKeyValueChangeNewKey] boolValue];
-        //        [[_videoPlayerView airplayIsActiveView] setHidden:!externalPlaybackActive];
+//        BOOL externalPlaybackActive = [[change objectForKey:NSKeyValueChangeNewKey] boolValue];
+//        [[_videoPlayerView airplayIsActiveView] setHidden:!externalPlaybackActive];
         return;
     }
     
@@ -447,33 +393,35 @@ isPlaying = _isPlaying;
         AVPlayerStatus status = [[change objectForKey:NSKeyValueChangeNewKey] integerValue];
         switch (status) {
             case AVPlayerStatusReadyToPlay:
-                playWhenReady = YES;
+//                playWhenReady = YES;
                 break;
             case AVPlayerStatusFailed:
-                // TODO: 重试X次后，提示失败
+                // TODO:
                 [self removeObserversFromVideoPlayerItem];
-                [self removePlayerTimeObservers];
+                //[self removePlayerTimeObservers];
                 self.videoPlayer = nil;
                 NSLog(@"failed");
                 break;
         }
     } else if ([keyPath isEqualToString:@"playbackBufferEmpty"] && _videoPlayer.currentItem.playbackBufferEmpty) {
-        self.playerIsBuffering = YES;
-        NSLog(@"kvo: playbackBufferEmpty startAnimating");
+        //self.playerIsBuffering = YES;
         [[_videoPlayerView activityIndicator] startAnimating];
         [self syncPlayPauseButtons];
     } else if ([keyPath isEqualToString:@"playbackLikelyToKeepUp"] && _videoPlayer.currentItem.playbackLikelyToKeepUp) {
-        NSLog(@"kvo: playbackLikelyToKeepUp stopAnimating");
-        if (![self isPlaying] && (playWhenReady || self.playerIsBuffering || scrubBuffering)) {
+        NSLog(@"playbackLikelyToKeepUp");
+//        if (![self isPlaying] && (playWhenReady || self.playerIsBuffering || scrubBuffering)) {
+//            [self playVideo];
+//        }
+        if (![self isPlaying]) {
             [self playVideo];
         }
         [[_videoPlayerView activityIndicator] stopAnimating];
         
     } else if ([keyPath isEqualToString:@"loadedTimeRanges"]) {
-        float durationTime = CMTimeGetSeconds([[self.videoPlayer currentItem] duration]);
+        float durationTime = CMTimeGetSeconds([[self.videoPlayer currentItem] duration]);        
         float bufferTime = [self availableDuration];
-        NSLog(@"kvo: loadedTimeRanges:%.3f",bufferTime/durationTime);
-        [self.videoPlayerView.progressView setProgress:bufferTime/durationTime animated:YES];
+        NSLog(@"durationTime:%.3f",bufferTime/durationTime);
+//        [self.videoPlayerView.progressView setProgress:bufferTime/durationTime animated:YES];
     }
     
     return;
@@ -489,7 +437,7 @@ isPlaying = _isPlaying;
         float startSeconds = CMTimeGetSeconds(timeRange.start);
         float durationSeconds = CMTimeGetSeconds(timeRange.duration);
         ret = (startSeconds + durationSeconds);
-    }
+    }    
     return ret;
 }
 
@@ -498,76 +446,6 @@ isPlaying = _isPlaying;
     return [_videoPlayer rate] != 0.0;
 }
 
--(void)removePlayerTimeObservers
-{
-    if (_scrubberTimeObserver) {
-        [_videoPlayer removeTimeObserver:_scrubberTimeObserver];
-        _scrubberTimeObserver = nil;
-    }
-    
-    if (_playClockTimeObserver) {
-        [_videoPlayer removeTimeObserver:_playClockTimeObserver];
-        _playClockTimeObserver = nil;
-    }
-}
-- (void)playerItemDidReachEnd:(NSNotification *)notification
-{
-    [self syncPlayPauseButtons];
-    _seekToZeroBeforePlay = YES;
-    
-    [self minimizeVideo];
-}
-
--(void)scrubbingDidBegin
-{
-    if ([self isPlaying]) {
-        [_videoPlayer pause];
-        [self syncPlayPauseButtons];
-        self.restoreVideoPlayStateAfterScrubbing = YES;
-        [self showControls];
-    }
-}
-
--(void)scrubberIsScrolling
-{
-    CMTime playerDuration = [self playerItemDuration];
-    double duration = CMTimeGetSeconds(playerDuration);
-    if (isfinite(duration)) {
-        double currentTime = floor(duration * _videoPlayerView.videoScrubber.value);
-        double timeLeft = floor(duration - currentTime);
-        
-        if (currentTime <= 0) {
-            currentTime = 0;
-            timeLeft = floor(duration);
-        }
-        
-        [_videoPlayerView.currentPositionLabel setText:[NSString stringWithFormat:@"%@ ", [self stringFormattedTimeFromSeconds:&currentTime]]];
-        
-        if (!self.showStaticEndTime) {
-            [_videoPlayerView.timeLeftLabel setText:[NSString stringWithFormat:@"-%@", [self stringFormattedTimeFromSeconds:&timeLeft]]];
-        } else {
-            [_videoPlayerView.timeLeftLabel setText:[NSString stringWithFormat:@"%@", [self stringFormattedTimeFromSeconds:&duration]]];
-        }
-        [_videoPlayer seekToTime:CMTimeMakeWithSeconds((float) currentTime, NSEC_PER_SEC)];
-    }
-}
-
--(void)scrubbingDidEnd
-{
-    if (self.restoreVideoPlayStateAfterScrubbing) {
-        self.restoreVideoPlayStateAfterScrubbing = NO;
-        scrubBuffering = YES;
-    }
-    [[_videoPlayerView activityIndicator] startAnimating];
-    
-    [self showControls];
-}
-
-- (void)dismissSelfHandler
-{
-    [_videoPlayer pause];
-    [self dismissModalViewControllerAnimated:YES];
-}
 @end
 
 
@@ -575,7 +453,7 @@ isPlaying = _isPlaying;
 
 #pragma mark - UIInterfaceOrientation
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)orientation{
-    //    return UIDeviceOrientationIsValidInterfaceOrientation(orientation);
+//    return UIDeviceOrientationIsValidInterfaceOrientation(orientation);
     return UIInterfaceOrientationIsLandscape(orientation);
 }
 // iOS 6.0+ 横竖屏
@@ -584,7 +462,7 @@ isPlaying = _isPlaying;
 }
 
 - (NSUInteger)supportedInterfaceOrientations {
-    //    return UIInterfaceOrientationMaskAll;
+//    return UIInterfaceOrientationMaskAll;
     return UIInterfaceOrientationMaskLandscape;
 }
 
